@@ -8,8 +8,8 @@ function App() {
     autoplay: false,
     controls: true,
     sources: [{
-      src: 'videos/video-1.webm', // 确保这是正确的视频 URL
-      type: 'video/webm'
+      src: 'videos/video-1.mp4', // 确保这是正确的视频 URL
+      type: 'video/mp4'
     }]
   }), []); // <-- 空依赖数组意味着只在组件首次挂载时创建一次
   
