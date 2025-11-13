@@ -1,41 +1,63 @@
 // src/App.js
-import React, { useMemo } from 'react'; // 导入 useMemo
+import React, { useMemo } from 'react';
 import VideoPlayer from './components/VideoPlayer';
+// 假设 '480p' 和 '720p' 是我们注册的组件名称
+const QUALITY_MENU_BUTTON_NAME = 'QualityMenuButton';
+
+// 定义可用的视频源及其分辨率
+const availableQualities = [
+  {
+    label: '720p',
+    sources: [{
+      src: 'videos/video-720p.mp4', // 请替换为您的 720p 视频URL
+      type: 'video/mp4'
+    }]
+  },
+  {
+    label: '480p',
+    sources: [{
+      src: 'videos/video-480p.mp4', // 请替换为您的 480p 视频URL
+      type: 'video/mp4'
+    }]
+  }
+];
+
+// 设置默认播放的分辨率
+const defaultQuality = availableQualities[0]; // 默认播放 720p
 
 function App() {
-  // 使用 useMemo 确保 options 对象只在依赖项([])变化时才创建
   const playerOptions = useMemo(() => ({
     autoplay: false,
     controls: true,
-    sources: [{
-      src: 'videos/video-1.mp4', // 确保这是正确的视频 URL
-      type: 'video/mp4'
-    }]
-  }), []); // <-- 空依赖数组意味着只在组件首次挂载时创建一次
+    // 1. 设置默认播放源
+    sources: defaultQuality.sources, 
+    // 2. 将所有分辨率源传递给 videojs 实例，以便在 player.options_ 中访问
+    qualities: availableQualities 
+  }), []); 
   
-const handlePlayerReady = (player) => {
-  console.log('Video.js 播放器已就绪，添加自定义控制键...');
+  const handlePlayerReady = (player) => {
+    console.log('Video.js 播放器已就绪，添加清晰度选择器...');
 
-  // 获取控制栏组件
-  const controlBar = player.getChild('ControlBar');
-  
-  // 在控制栏中添加我们注册的 'CustomButton' 组件
-  controlBar.addChild(
-    'CustomButton', 
-    { 
-      // 可以传递选项给 CustomButton 的 constructor
-      controlText: '自定义切换',
-      // onClick: () => console.log('按钮被点击了！') 
-    }, 
-    // 插入位置：通常在控制栏的第0个位置（最左边）
-    0 
-  );
-};
+    const controlBar = player.getChild('ControlBar');
+    
+    // 在控制栏中添加我们注册的 'QualityMenuButton' 组件
+    controlBar.addChild(
+      QUALITY_MENU_BUTTON_NAME, 
+      { 
+        qualities: availableQualities, // 传递所有选项给菜单按钮
+        currentQuality: defaultQuality.label // 传递默认选中的分辨率
+      }, 
+      // 插入位置：控制栏从右往左数，通常放在音量控制前面
+      // 这里的 10 是一个示例索引，您可以根据需要调整
+      controlBar.children().length - 2 
+    );
+  };
 
   return (
     <div className="App">
       <h1>在线播放程序</h1>
-      <VideoPlayer options={playerOptions} onReady={handlePlayerReady} /> {/* 传递稳定的引用 */}
+      {/* 传递稳定的引用 */}
+      <VideoPlayer options={playerOptions} onReady={handlePlayerReady} /> 
     </div>
   );
 }
